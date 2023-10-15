@@ -1,6 +1,7 @@
 <script setup lang="ts">
 interface Props {
-  word: string
+  word: string,
+  correctLetters: string[]
 }
 
 defineProps<Props>()
@@ -8,6 +9,8 @@ defineProps<Props>()
 
 <template>
   <div class="word">
-    <span v-for="letter in word" class="letter"></span>
+    <span v-for="letter in word" class="letter">
+      {{ correctLetters.includes(letter.toLowerCase()) ? letter : '' }}
+    </span>
   </div>
 </template>
