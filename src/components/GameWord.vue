@@ -9,7 +9,7 @@ defineProps<Props>()
 
 <template>
   <div class="word">
-    <span v-for="letter in word" class="letter">
+    <span v-for="(letter, ind) in word" class="letter" :key="ind">
       {{ correctLetters.includes(letter.toLowerCase()) ? letter : '' }}
     </span>
   </div>
