@@ -5,16 +5,15 @@ import GameNotification from "@/components/GameNotification.vue";
 import GameWord from "@/components/GameWord.vue";
 import GameWrongLetters from "@/components/GameWrongLetters.vue";
 import GameFigure from "@/components/GameFigure.vue";
-import {computed, ref} from "vue";
+import {ref} from "vue";
+import {useLetters} from "@/composables/useLetters";
+import {useNotifocation} from "@/composables/useNotifocation";
 
 const word = ref('Катамаран')
-const letters = ref<string[]>([])
-const correctLetters = computed(() => letters.value.filter(el => word.value.toLowerCase().includes(el)))
-const wrongLetters = computed(() => letters.value.filter(el => !word.value.toLowerCase().includes(el)))
-const notification = ref<InstanceType<typeof GameNotification> | null>(null)
+const {letters, correctLetters, wrongLetters, isWin, isFail, addLetter} = useLetters(word)
+const {notification, showNotification} = useNotifocation()
 const popup = ref<InstanceType<typeof GamePopup> | null>(null)
-const isFail = computed(() => wrongLetters.value.length > 6)
-const isWin = computed(() => word.value.toLowerCase().split('').every(el => correctLetters.value.includes(el)))
+
 
 function restart() {
   letters.value = []
@@ -22,14 +21,16 @@ function restart() {
 }
 
 document.addEventListener('keydown', ({key}) => {
+  if (isFail.value || isWin.value) return false
   if (!/[а-яА-ЯёЁ]/.test(key)) return false
   key = key.toLowerCase()
+
   if (letters.value.includes(key)) {
-    notification.value?.open()
-    setTimeout(() => notification.value?.close(), 500)
-  } else {
-    letters.value.push(key)
+    showNotification()
+    return;
   }
+
+  addLetter(key)
 
   if (isFail.value) popup.value?.open('fail')
   if (isWin.value) popup.value?.open('win')
@@ -41,9 +42,7 @@ document.addEventListener('keydown', ({key}) => {
   <GameHeader/>
   <div class="game-container">
     <GameFigure :len="wrongLetters.length"/>
-
     <GameWrongLetters :wrongLetters="wrongLetters"/>
-
     <GameWord :word="word" :letters="correctLetters"/>
   </div>
 
